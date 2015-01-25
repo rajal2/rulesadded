@@ -51,7 +51,7 @@ public class Game implements IGameBoardChangedCallback {
 
     private void initializePlayers(GameMode mode)
     {
-        //todo: randomize the players somehow
+        //todo: randomize the players ("current player" will go first)
         switch (mode)
         {
             case PlayerVsPlayer:
@@ -69,6 +69,7 @@ public class Game implements IGameBoardChangedCallback {
             default:
                 throw  new IllegalArgumentException();
         }
+
     }
 
     void acceptMove(StoneColor color, int row, int column) throws IllegalMoveExcetion, MoveNotAllowedException

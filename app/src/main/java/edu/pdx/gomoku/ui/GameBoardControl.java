@@ -101,6 +101,9 @@ public class GameBoardControl extends View implements IGameBoardChangedCallback 
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        if(game==null)
+            return;
+
         drawGrid(canvas);
         drawStones(canvas);
     }
@@ -132,6 +135,8 @@ public class GameBoardControl extends View implements IGameBoardChangedCallback 
         int width = this.getWidth();
         int height = this.getHeight();
 
+
+
         int rows = game.getBoard().getRowCount();
         int columns = game.getBoard().getColumnCount();
 
@@ -156,6 +161,7 @@ public class GameBoardControl extends View implements IGameBoardChangedCallback 
 
     private void drawStones(Canvas canvas)
     {
+
         GameCellState[][] state = game.getBoard().getBoardState();
 
         for(int row = 0; row<game.getBoard().getRowCount(); row++)

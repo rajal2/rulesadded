@@ -25,14 +25,33 @@
         android:layout_height="fill_parent"
         android:background="@color/highlighted_text_material_light" />
 
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Waiting..."
-        android:id="@+id/statusTextView"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="20dp" />
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Waiting..."
+            android:id="@+id/statusTextView"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/elapsedTimeTextView"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="20dp"/>
+
+        </LinearLayout>
+
+
 
     <Button
         android:layout_width="wrap_content"

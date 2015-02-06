@@ -7,5 +7,7 @@
     <string name="title_activity_result">Game Results</string>
     <string name="title_activity_start_network_game">Start New Network Game</string>
     <string name="title_activity_join_network_game">Join a Network Game</string>
+    <string name="title_activity_rules">Gomoku Game Rules</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

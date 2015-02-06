@@ -48,6 +48,8 @@ public class StartActivity extends ActionBarActivity {
 
     private void binEvents()
     {
+
+
         View temp = this.findViewById(R.id.singlePlayerGameButton);
 
         if(temp!=null)
@@ -92,6 +94,20 @@ public class StartActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     joinNetworkGame();
+                }
+            });
+        }
+
+        temp = this.findViewById(R.id.gameRulesButton);
+
+        if(temp!=null)
+        {
+            temp.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(StartActivity.this, RulesActivity.class);
+
+                    startActivity(intent);
                 }
             });
         }

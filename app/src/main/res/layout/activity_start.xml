@@ -23,6 +23,16 @@
             android:layout_gravity="center_horizontal"
             android:layout_margin="10dp" />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Game Rules"
+            android:id="@+id/gameRulesButton"
+            android:layout_gravity="center_horizontal"
+            android:textColor="#ff0000ff"
+            android:background="#00000000"
+            />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

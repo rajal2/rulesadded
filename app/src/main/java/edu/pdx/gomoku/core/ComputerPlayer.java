@@ -1,5 +1,7 @@
 package edu.pdx.gomoku.core;
 
+import android.util.Log;
+
 import java.util.Random;
 
 /**
@@ -45,7 +47,7 @@ public class ComputerPlayer extends Player {
         //do nothing ()
     }
 
-    private void calcuateMove(Game game)
+    private void calculateMove(Game game)
     {
         GameBoard board = game.getBoard();
 
@@ -78,10 +80,19 @@ public class ComputerPlayer extends Player {
 
 
     //base series payoffs
+    //unblocked 4
     private static final int SERIES_1 = 2^9;
+    //half blocked 4
     private static final int SERIES_2 = 2^8;
+    //unblocked 3
     private static final int SERIES_3 = 2^7;
+    //half blocked 3
     private static final int SERIES_4 = 2^6;
+    private static final int SERIES_5 = 2^5;
+    private static final int SERIES_6 = 2^4;
+    private static final int SERIES_7 = 2^3;
+    private static final int SERIES_8 = 2^2;
+    private static final int SERIES_9 = 2^1;
 
     /**
      *
@@ -89,8 +100,13 @@ public class ComputerPlayer extends Player {
      * @param color
      * @return Array of rows/columns containing payoffs for each cell
      */
+
+    //I incorporated this step into the getPayoffSeries because the scanning procedure is the same in these two
+    // and in most steps we won't get an immediate win so this full scan is wasted, plus, to add the immediate win
+    // as the top of the series won't make that one slower and we won't miss the spot either.
     private int[][] getPayoff_InstantWin(GameBoard board, StoneColor color)
     {
+        //the matrix to fill in
         int[][] payoffMatrix = new int[board.getRowCount()][board.getColumnCount()];
 
         //TODO: Do the magic here
@@ -125,7 +141,25 @@ public class ComputerPlayer extends Player {
         int[][] payoffMatrix = new int[board.getRowCount()][board.getColumnCount()];
 
         //TODO: Do the magic here
+        //for every spot in matrix, call int getScore(row, column, board, color):
+            //for each direction:
+                // find start and end spot and get number (end - start + 1)
+                // checkLiveState(), return blocked/dead/alive
+                // if(blocked || number >= 6), do nothing
+                // if(alive)
+                    //if(number == 4) nAlive4++;
+                    //if(number == 3) nAlive3++;
+                    //etc.
+                // if(dead), do similar thing as alive
+            //after checking all 4 directions, check nAlive4 through nDead2, return score level
+            //if( nAlive4 >= 1 || nDead4 >=2 || (nDead4 = 1&& nAlive3 >=1) ), return SERIES_1
+        //Then assign the returned number to the corresponding spot in payoffMatrix.
 
+        //for every spot in matrix, call int getScore(board, color):
+        for(int i = 0; i < board.getRowCount()-1; i++){
+            for(int j = 0; j < board.getColumnCount()-1; j++)
+                payoffMatrix [i][j] = getScore(i, j, board, color);
+        }
         return payoffMatrix;
     }
 
@@ -143,4 +177,255 @@ public class ComputerPlayer extends Player {
 
         return payoffMatrix;
     }
+
+    /**
+     *
+     * @param row
+     * @param column
+     * @param board
+     * @param color
+     * @return Score for the position at (row, column)
+     * This function has too much duplicated code, needs to be re-organized later!
+     */
+    private int getScore(int row, int column, GameBoard board, StoneColor color){
+        //for each direction:
+        // find start and end spot and get number (end - start + 1)
+        // checkLiveState to get blocked/dead/alive
+        // if(dead || number >= 6), do nothing
+        // if(alive)
+        //if(number == 4) nAlive4++;
+        //if(number == 3) nAlive3++;
+        //etc.
+        // if(blocked), do similar thing as alive
+        //after checking all 4 directions, check nAlive4 through nDead2, return score level
+        //if( nAlive4 >= 1 || nBlocked4 >=2 || (nBlocked4 = 1&& nAlive3 >=1) ), return SERIES_1
+        //and so on
+
+        int nNonDead5 = 0, nAlive4 = 0, nBlocked4 = 0, nAlive3 = 0, nBlocked3 = 0, nAlive2 = 0, nBlocked2 = 0;
+        int start, end, startC, endC, startR, endR;
+        int number, nBlockedEnds;
+        LiveState liveState;
+
+        GameCellState[][] cells = board.getBoardState();
+        GameCellState targetState = color == StoneColor.Black ? GameCellState.BlackStone : GameCellState.WhiteStone;
+
+        //check row:
+        start = column;
+        end = column;
+        nBlockedEnds = 0;
+
+        while (start > 0 && cells[row][start - 1] == targetState) {
+            start--;
+        }
+
+        while (end < board.getColumnCount() - 1 && cells[row][end + 1] == targetState) {
+            end++;
+        }
+
+        number = end -  start + 1;
+
+        if(start == 0 || cells[row][start - 1] != GameCellState.Empty)
+            nBlockedEnds++;
+        if(end == board.getColumnCount() - 1 || cells[row][end+1] != GameCellState.Empty)
+            nBlockedEnds++;
+
+        liveState = checkLiveState(nBlockedEnds);
+
+        if(number == 5 && liveState != LiveState.Dead)
+            //get one winning state
+            nNonDead5++;
+        if(number == 4) {
+            if(liveState == LiveState.Alive)
+                nAlive4++;
+            if(liveState == LiveState.Blocked)
+                nBlocked4++;
+        }
+        if(number == 3) {
+            if(liveState == LiveState.Alive)
+                nAlive3++;
+            if(liveState == LiveState.Blocked)
+                nBlocked3++;
+        }
+        if(number == 2) {
+            if(liveState == LiveState.Alive)
+                nAlive2++;
+            if(liveState == LiveState.Blocked)
+                nBlocked2++;
+        }
+
+        //checkColumn
+        start = row; end = row;
+        nBlockedEnds = 0;
+        while(start>0 && cells[start - 1][column]== targetState)
+        {
+            start--;
+        }
+
+        while(end<board.getRowCount()-1 && cells[end + 1][column]== targetState)
+        {
+            end++;
+        }
+
+        number = end -  start + 1;
+
+        if(start == 0 || cells[start - 1][column] != GameCellState.Empty)
+            nBlockedEnds++;
+        if(end == board.getColumnCount() - 1 || cells[end+1][column]  != GameCellState.Empty)
+            nBlockedEnds++;
+
+        liveState = checkLiveState(nBlockedEnds);
+
+        if(number == 5 && liveState != LiveState.Dead)
+            //get one winning state
+            nNonDead5++;
+        if(number == 4) {
+            if(liveState == LiveState.Alive)
+                nAlive4++;
+            if(liveState == LiveState.Blocked)
+                nBlocked4++;
+        }
+        if(number == 3) {
+            if(liveState == LiveState.Alive)
+                nAlive3++;
+            if(liveState == LiveState.Blocked)
+                nBlocked3++;
+        }
+        if(number == 2) {
+            if(liveState == LiveState.Alive)
+                nAlive2++;
+            if(liveState == LiveState.Blocked)
+                nBlocked2++;
+        }
+
+        //check from upper left
+        startC = column; endC = column; startR = row; endR = row;
+        nBlockedEnds = 0;
+
+        while(startC>0 && startR < board.getRowCount() - 1 && cells[startR+1][startC-1]== targetState)
+        {
+            startC--;
+            startR++;
+        }
+
+        while(endC<board.getColumnCount()-1 && endR>0 && cells[endR-1][endC+1]== targetState)
+        {
+            endC++;
+            endR--;
+        }
+
+        number = endC -  startC + 1;
+
+        if(startC == 0 || startR == board.getRowCount()-1 || cells[startR+1][startC-1] != GameCellState.Empty)
+            nBlockedEnds++;
+        if(endC == board.getColumnCount()-1 || endR == 0 || cells[endR-1][endC+1] != GameCellState.Empty)
+            nBlockedEnds++;
+
+        liveState = checkLiveState(nBlockedEnds);
+
+        if(number == 5 && liveState != LiveState.Dead)
+            //get one winning state
+            nNonDead5++;
+        if(number == 4) {
+            if(liveState == LiveState.Alive)
+                nAlive4++;
+            if(liveState == LiveState.Blocked)
+                nBlocked4++;
+        }
+        if(number == 3) {
+            if(liveState == LiveState.Alive)
+                nAlive3++;
+            if(liveState == LiveState.Blocked)
+                nBlocked3++;
+        }
+        if(number == 2) {
+            if(liveState == LiveState.Alive)
+                nAlive2++;
+            if(liveState == LiveState.Blocked)
+                nBlocked2++;
+        }
+
+        //check from lower left
+        startC = column; endC = column; startR = row; endR = row;
+        nBlockedEnds = 0;
+        while(startC>0 && startR >0 && cells[startR-1][startC-1]== targetState)
+        {
+            startR--;
+            startC--;
+        }
+
+        while(endC<board.getColumnCount()-1 && endR < board.getRowCount()-1 && cells[endR+1][endC+1]== targetState)
+        {
+            endR++;
+            endC++;
+        }
+
+        number = endC -  startC + 1;
+
+        if(startC == 0 || startR == 0 || cells[startR-1][startC-1] != GameCellState.Empty)
+            nBlockedEnds++;
+        if(endC == board.getColumnCount()-1 || endR == board.getRowCount()-1 || cells[endR+1][endC+1] != GameCellState.Empty)
+            nBlockedEnds++;
+
+        liveState = checkLiveState(nBlockedEnds);
+
+        if(number == 5 && liveState != LiveState.Dead)
+            //get one winning state
+            nNonDead5++;
+        if(number == 4) {
+            if(liveState == LiveState.Alive)
+                nAlive4++;
+            if(liveState == LiveState.Blocked)
+                nBlocked4++;
+        }
+        if(number == 3) {
+            if(liveState == LiveState.Alive)
+                nAlive3++;
+            if(liveState == LiveState.Blocked)
+                nBlocked3++;
+        }
+        if(number == 2) {
+            if(liveState == LiveState.Alive)
+                nAlive2++;
+            if(liveState == LiveState.Blocked)
+                nBlocked2++;
+        }
+
+        //Now compare combinations of different threat patterns
+        if( nNonDead5 >= 1) return INSTANT_WIN_PAYOFF;
+        if( nAlive4 >= 1 || nBlocked4 >=2 || (nBlocked4 == 1 && nAlive3 >=1) ) return SERIES_1;
+        if (nAlive3 >=2) return SERIES_2;
+        if (nAlive3 == 1 && nBlocked3 >= 1) return SERIES_3;
+        if (nBlocked4 == 1) return SERIES_4;
+        if (nAlive3 == 1) return SERIES_5;
+        if (nAlive2 >= 2) return SERIES_6;
+        if (nBlocked3 >= 1) return SERIES_7;
+        if (nAlive2 == 1) return SERIES_8;
+        if (nBlocked2 >= 1) return SERIES_9;
+        //otherwise, it's a non_connected single button
+        return 0;
+
+    }
+
+    LiveState checkLiveState (int nBlockedEnds) {
+
+        LiveState liveState;
+
+        switch (nBlockedEnds) {
+            case 0:
+                liveState = LiveState.Alive;
+                break;
+            case 1:
+                liveState = LiveState.Blocked;
+                break;
+            case 2:
+                liveState = LiveState.Dead;
+                break;
+            default:
+                liveState = LiveState.Alive;
+                Log.d("getScore", "Unexpected live state!");
+                break;
+        }
+        return liveState;
+    }
+
 }

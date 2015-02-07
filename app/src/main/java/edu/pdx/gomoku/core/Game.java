@@ -127,7 +127,7 @@ public class Game implements IGameBoardChangedCallback {
         }
     }
 
-    public void removeCallaback(IGameStateChangedCallback target) {
+    public void removeCallback(IGameStateChangedCallback target) {
         if (callbacks.contains(target)) {
             callbacks.remove(target);
         }
@@ -201,9 +201,6 @@ public class Game implements IGameBoardChangedCallback {
         if (row < 0 || column < 0 || row >= board.getRowCount() || column >= board.getColumnCount()) {
             Log.d("isWinner", "invalid input!");
         }
-
-
-        //TODO: This is dumb placeholder code. Needs to be replace with the actual implementation
 
         GameCellState[][] cells = board.getBoardState();
         GameCellState targetState = color == StoneColor.Black ? GameCellState.BlackStone : GameCellState.WhiteStone;

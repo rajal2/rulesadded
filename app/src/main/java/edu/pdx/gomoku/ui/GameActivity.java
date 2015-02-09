@@ -170,27 +170,29 @@ public class GameActivity extends ActionBarActivity implements IGameStateChanged
                         }
                         break;
                     }
-
                 }
                 break;
             case PlayerWins: {
-                Player[] players = sender.getPlayers();
-                String score = String.format("Current score:\r\n%s - %d\r\n%s - %d",
-                        players[0].getColor() == StoneColor.Black ? "Black Player" : "White Player",
-                        players[0].getScore(),
-                        players[1].getColor() == StoneColor.Black ? "Black Player" : "White Player",
-                        players[1].getScore()) ;
-
-
-
-                ShowWinner("Player wins.\r\n" + score + "\r\nRestart?");
+                ShowWinner("Player wins.\r\n" + getScoreString(sender) + "\r\nRestart?");
                 break;
             }
             case Tie: {
-                ShowTie("It's a tie.\r\nRestart?");
+                ShowTie("It's a tie.\r\n" + getScoreString(sender) + "\r\nRestart?");
                 break;
             }
         }
+    }
+
+    private String getScoreString(Game sender)
+    {
+        Player[] players = sender.getPlayers();
+        String score = String.format("Current score:\r\n\r\n\t%s - %d\r\n\t%s - %d\r\n",
+                players[0].getColor() == StoneColor.Black ? "Black Player" : "White Player",
+                players[0].getScore(),
+                players[1].getColor() == StoneColor.Black ? "Black Player" : "White Player",
+                players[1].getScore()) ;
+
+        return score;
     }
 
     private void restartTimer()

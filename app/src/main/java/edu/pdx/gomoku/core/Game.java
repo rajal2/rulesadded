@@ -104,6 +104,12 @@ public class Game implements IGameBoardChangedCallback {
         return board;
     }
 
+
+    public Player[] getPlayers()
+    {
+        return  new Player[] { currentPlayer, otherPlayer};
+    }
+
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
@@ -155,6 +161,7 @@ public class Game implements IGameBoardChangedCallback {
 
             if (isWinner(currentPlayer.getColor(), args.getRow(), args.getColumn())) {
                 state = GameState.PlayerWins;
+                currentPlayer.incrementScore();
                 //Raise callback
                 raiseCallback();
                 return;

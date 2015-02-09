@@ -6,6 +6,7 @@ package edu.pdx.gomoku.core;
 public abstract class Player {
     private PlayerType type;
     private StoneColor color;
+    private int score;
 
     public PlayerType getType() {
         return type;
@@ -18,6 +19,21 @@ public abstract class Player {
     public Player(PlayerType type, StoneColor color) {
         this.type = type;
         this.color = color;
+    }
+
+    public  int getScore()
+    {
+        return  score;
+    }
+
+    public  void resetScore()
+    {
+        score = 0;
+    }
+
+    public  void incrementScore()
+    {
+        score++;
     }
 
     /**

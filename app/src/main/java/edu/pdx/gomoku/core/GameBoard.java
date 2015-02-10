@@ -91,13 +91,13 @@ public class GameBoard {
             case Black:
                 this.cellStates[row][column] = GameCellState.BlackStone;
                 filledCellNumber++;
-                Log.d("GameBoard", "filled cell number is " + filledCellNumber);
+                //Log.d("GameBoard", "filled cell number is " + filledCellNumber);
                 raiseCallback(row, column);
                 break;
             case White:
                 this.cellStates[row][column] = GameCellState.WhiteStone;
                 filledCellNumber++;
-                Log.d("GameBoard", "filled cell number is " + filledCellNumber);
+                //Log.d("GameBoard", "filled cell number is " + filledCellNumber);
                 raiseCallback(row, column);
                 break;
 
@@ -122,4 +122,6 @@ public class GameBoard {
     }
 
     public boolean isFull() { return filledCellNumber == totalCellNumber; }
+
+    public boolean isEmpty() { return filledCellNumber == 0; }
 }

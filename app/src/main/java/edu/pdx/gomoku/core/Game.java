@@ -165,7 +165,7 @@ public class Game implements IGameBoardChangedCallback {
         //TODO: Check if the board is not full
         if(board.isFull()) {
             state = GameState.Tie;
-            Log.d("onGameBoardChanged", "Tie detected!" );
+            //Log.d("onGameBoardChanged", "Tie detected!" );
             raiseCallback();
             return;
         }
@@ -194,7 +194,7 @@ public class Game implements IGameBoardChangedCallback {
      * @return
      */
     private boolean isWinner(StoneColor color, int row, int column) {
-        Log.d("isWinner", "color is " + color + " position " + row + ", " + column);
+        //Log.d("isWinner", "color is " + color + " position " + row + ", " + column);
 
         //TODO: Valiate the input (row/column >= 0 and < max rows/columns, etc.)
         //TODO: isn't it better to put this part into the GameBoard.acceptMove()
@@ -247,8 +247,8 @@ public class Game implements IGameBoardChangedCallback {
         }
 
         if (end - start == 4) {
-            boolean endsBlocked = ((start == 0 || cells[row][start-1] != GameCellState.Empty) &&
-                          (end == board.getColumnCount()-1 || cells[row][end + 1] != GameCellState.Empty));
+            boolean endsBlocked = ((start != 0 && cells[row][start-1] != GameCellState.Empty) &&
+                          (end != board.getColumnCount()-1 && cells[row][end + 1] != GameCellState.Empty));
             if(!endsBlocked)
             return true;
         }
@@ -269,11 +269,11 @@ public class Game implements IGameBoardChangedCallback {
             end++;
         }
 
-        Log.d("check column:", "start at " + start + ", end at " + end);
+        //Log.d("check column:", "start at " + start + ", end at " + end);
         if(end-start == 4)
         {
-            boolean endsBlocked = ((start == 0 || cells[start - 1][column] != GameCellState.Empty) &&
-                   (end == board.getRowCount()-1 || cells[end + 1][column] != GameCellState.Empty));
+            boolean endsBlocked = ((start != 0 && cells[start - 1][column] != GameCellState.Empty) &&
+                   (end != board.getRowCount()-1 && cells[end + 1][column] != GameCellState.Empty));
             if(!endsBlocked)
                 return true;
         }
@@ -295,11 +295,11 @@ public class Game implements IGameBoardChangedCallback {
             endR--;
         }
 
-        Log.d("check from upper left:", "start at row" + startR + " column " + startC + ", end at " + endR + ", " + endC);
+        //Log.d("check from upper left:", "start at row" + startR + " column " + startC + ", end at " + endR + ", " + endC);
         if(endC-startC == 4)
         {
-            boolean endsBlocked = ((startC == 0 || startR == board.getRowCount()-1 || cells[startR+1][startC-1] != GameCellState.Empty) &&
-                    (endC == board.getColumnCount()-1 || endR == 0 || cells[endR-1][endC+1] != GameCellState.Empty));
+            boolean endsBlocked = ((startC != 0 && startR != board.getRowCount()-1 && cells[startR+1][startC-1] != GameCellState.Empty) &&
+                    (endC != board.getColumnCount()-1 && endR != 0 && cells[endR-1][endC+1] != GameCellState.Empty));
             if(!endsBlocked)
                 return true;
         }
@@ -325,8 +325,8 @@ public class Game implements IGameBoardChangedCallback {
         if(endR-startR == 4)
         {
             //Log.d("isWinner", "checking ends!");
-            boolean endsBlocked = ((startC == 0 || startR == 0 || cells[startR-1][startC-1] != GameCellState.Empty) &&
-                   (endC == board.getColumnCount()-1 || endR == board.getRowCount()-1 || cells[endR+1][endC+1] != GameCellState.Empty));
+            boolean endsBlocked = ((startC != 0 && startR != 0 && cells[startR-1][startC-1] != GameCellState.Empty) &&
+                   (endC != board.getColumnCount()-1 && endR != board.getRowCount()-1 && cells[endR+1][endC+1] != GameCellState.Empty));
             //Log.d("isWinner", "endsBlocked is: " + endsBlocked);
             if(!endsBlocked)
                 return true;

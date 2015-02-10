@@ -19,17 +19,25 @@ public class ComputerPlayer extends Player {
 
         game.setState(GameState.WaitingForPlayerMove);
 
-        Random random = new Random();
+        //Random random = new Random();
 
         //this is placeholder code
         while (true)
         {
             try
             {
-                int row = random.nextInt() % game.getBoard().getRowCount();
-                int col = random.nextInt() % game.getBoard().getColumnCount();
-
-                game.acceptMove(this.getColor(), Math.abs(row), Math.abs(col));
+                //int row = random.nextInt() % game.getBoard().getRowCount();
+                //int col = random.nextInt() % game.getBoard().getColumnCount();
+                GameBoard board = game.getBoard();
+                int row = board.getRowCount()/2;
+                int column = board.getColumnCount()/2;
+                if(board.isEmpty()) {
+                    game.acceptMove(this.getColor(), row, column);
+                }
+                else {
+                    int[] bestCell = bestBet(board, this.getColor());
+                    game.acceptMove(this.getColor(), bestCell[0], bestCell[1]);
+                }
 
                 break;
             }
@@ -57,9 +65,66 @@ public class ComputerPlayer extends Player {
         //TODO: Yuriy - add things up and grab the best payoff
     }
 
-    private int[][] addMatrix(int[][] target, int[][] source)
+    private int[] bestBet(GameBoard board, StoneColor color) {
+        int[] bestCell = {-1, -1};
+        int[][] computerScoreMatrix, opponentScoreMatrix;
+
+        StoneColor opponentColor = color == StoneColor.Black ? StoneColor.White:StoneColor.Black;
+
+        //calculate score matrix for the computer player
+        computerScoreMatrix = getPayoff_Series(board, color);
+        //calculate score matrix for the opponent human
+        opponentScoreMatrix = getPayoff_Series(board, opponentColor);
+
+        int[] bestCellCompPlayer = getBestCell(computerScoreMatrix);
+        int[] bestCellOpponent = getBestCell(opponentScoreMatrix);
+
+        Log.d("bestBet", "computer vs human max score is: " + bestCellCompPlayer[2] + ", " + bestCellOpponent[2]);
+
+        if(bestCellCompPlayer[2] >= bestCellOpponent[2]) {
+            bestCell[0] = bestCellCompPlayer[0];
+            bestCell[1] = bestCellCompPlayer[1];
+        }
+        else {
+            bestCell[0] = bestCellOpponent[0];
+            bestCell[1] = bestCellOpponent[1];
+        }
+
+        return bestCell;
+    }
+
+    private int[] getBestCell(int[][] decisionMatrix) {
+
+        int[] bestCell = {-1, -1, -2^10};//{row, column, score}
+        int noRows = decisionMatrix[0].length;
+        int noCols = decisionMatrix.length;
+        int max = -2^10;
+
+        for(int  i= 0; i < noRows; i++) {
+            for(int j = 0; j <noCols; j++) {
+                if(decisionMatrix[i][j] >= max) {
+                    max = decisionMatrix[i][j];
+                    bestCell[0] = i;
+                    bestCell[1] = j;
+                    bestCell[2] = max;
+                }
+            }
+        }
+        return bestCell;
+    }
+
+    private float[][] addMatrix(float scalar,int[][] target, int[][] source)
     {
-        return null;
+        int noRows = target[0].length;
+        int noCols = target.length;
+        float[][] result = new float[noRows][noCols];
+
+        for(int i = 0; i < noRows; i++){
+            for(int j = 0; j <noCols; j++) {
+                result[i][j] = target[i][j] + 0.7f * (float)source[i][j];
+            }
+        }
+        return result;
     }
 
     private int[][] scalarMultiplyMatrix(int[][] target, int[][] source)
@@ -70,7 +135,7 @@ public class ComputerPlayer extends Player {
     private static final float OPPOSING_PLAYER_PAYOFF_RATIO = 0.75F;
 
     //imminent win/loss payoffs
-    private static final int INSTANT_WIN_PAYOFF = 2^16;
+    private static final int INSTANT_WIN_PAYOFF = 100;//2^10;
 
     //base adjacency payoffs
     private static final int ANDJACENCY_1 = 2^5; //right next to the cell
@@ -81,18 +146,18 @@ public class ComputerPlayer extends Player {
 
     //base series payoffs
     //unblocked 4
-    private static final int SERIES_1 = 2^9;
+    private static final int SERIES_1 = 90;//2^9;
     //half blocked 4
-    private static final int SERIES_2 = 2^8;
+    private static final int SERIES_2 = 80;// 2^8;
     //unblocked 3
-    private static final int SERIES_3 = 2^7;
+    private static final int SERIES_3 = 70;//2^7;
     //half blocked 3
-    private static final int SERIES_4 = 2^6;
-    private static final int SERIES_5 = 2^5;
-    private static final int SERIES_6 = 2^4;
-    private static final int SERIES_7 = 2^3;
-    private static final int SERIES_8 = 2^2;
-    private static final int SERIES_9 = 2^1;
+    private static final int SERIES_4 = 60;//2^6;
+    private static final int SERIES_5 = 50;//2^5;
+    private static final int SERIES_6 = 40;//2^4;
+    private static final int SERIES_7 = 30;//2^3;
+    private static final int SERIES_8 = 20;//2^2;
+    private static final int SERIES_9 = 10;//2^1;
 
     /**
      *
@@ -156,8 +221,8 @@ public class ComputerPlayer extends Player {
         //Then assign the returned number to the corresponding spot in payoffMatrix.
 
         //for every spot in matrix, call int getScore(board, color):
-        for(int i = 0; i < board.getRowCount()-1; i++){
-            for(int j = 0; j < board.getColumnCount()-1; j++)
+        for(int i = 0; i < board.getRowCount(); i++){
+            for(int j = 0; j < board.getColumnCount(); j++)
                 payoffMatrix [i][j] = getScore(i, j, board, color);
         }
         return payoffMatrix;
@@ -209,6 +274,10 @@ public class ComputerPlayer extends Player {
         GameCellState[][] cells = board.getBoardState();
         GameCellState targetState = color == StoneColor.Black ? GameCellState.BlackStone : GameCellState.WhiteStone;
 
+        //return negative score if this cell is not empty
+        if(cells[row][column] != GameCellState.Empty)
+            return -2^10;
+
         //check row:
         start = column;
         end = column;
@@ -231,7 +300,7 @@ public class ComputerPlayer extends Player {
 
         liveState = checkLiveState(nBlockedEnds);
 
-        if(number == 5 && liveState != LiveState.Dead)
+        if(number == 5 && (liveState != LiveState.Dead || (liveState == LiveState.Dead && (start == 0 || end == board.getColumnCount()-1))))
             //get one winning state
             nNonDead5++;
         if(number == 4) {
@@ -270,12 +339,12 @@ public class ComputerPlayer extends Player {
 
         if(start == 0 || cells[start - 1][column] != GameCellState.Empty)
             nBlockedEnds++;
-        if(end == board.getColumnCount() - 1 || cells[end+1][column]  != GameCellState.Empty)
+        if(end == board.getRowCount() - 1 || cells[end+1][column]  != GameCellState.Empty)
             nBlockedEnds++;
 
         liveState = checkLiveState(nBlockedEnds);
 
-        if(number == 5 && liveState != LiveState.Dead)
+        if(number == 5 && (liveState != LiveState.Dead || (liveState == LiveState.Dead && (start == 0 || end == board.getRowCount()-1))))
             //get one winning state
             nNonDead5++;
         if(number == 4) {
@@ -322,7 +391,9 @@ public class ComputerPlayer extends Player {
 
         liveState = checkLiveState(nBlockedEnds);
 
-        if(number == 5 && liveState != LiveState.Dead)
+        boolean blockedAtEdge = (startC == 0 || startR == board.getRowCount()-1) || (endC == board.getColumnCount()-1 || endR == 0);
+
+        if(number == 5 && (liveState != LiveState.Dead || (liveState == LiveState.Dead && blockedAtEdge)))
             //get one winning state
             nNonDead5++;
         if(number == 4) {
@@ -367,8 +438,8 @@ public class ComputerPlayer extends Player {
             nBlockedEnds++;
 
         liveState = checkLiveState(nBlockedEnds);
-
-        if(number == 5 && liveState != LiveState.Dead)
+        blockedAtEdge = (startC == 0 || startR == 0) || (endC == board.getColumnCount()-1 || endR == board.getRowCount()-1);
+        if(number == 5 && (liveState != LiveState.Dead || liveState == LiveState.Dead && blockedAtEdge))
             //get one winning state
             nNonDead5++;
         if(number == 4) {

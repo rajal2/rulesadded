@@ -17,7 +17,7 @@ public class LocalPlayer extends Player {
 
     @Override
     public void startMove(Game game) {
-        Log.d("Player", "Local player move");
+        //Log.d("Player", "Local player move");
         this.game = game;
         game.setState(GameState.WaitingForPlayerMove);
     }

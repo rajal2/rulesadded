@@ -21,6 +21,7 @@ import edu.pdx.gomoku.core.BoardSize;
 import edu.pdx.gomoku.core.Game;
 import edu.pdx.gomoku.core.GameMode;
 import edu.pdx.gomoku.core.Player;
+import edu.pdx.gomoku.core.StoneColor;
 import edu.pdx.gomoku.core.callbacks.IGameStateChangedCallback;
 import edu.pdx.gomoku.gomoku.R;
 
@@ -169,16 +170,29 @@ public class GameActivity extends ActionBarActivity implements IGameStateChanged
                         }
                         break;
                     }
-
                 }
                 break;
-            case PlayerWins:
-                ShowWinner("Player wins.\r\nRestart?");
+            case PlayerWins: {
+                ShowWinner("Player wins.\r\n" + getScoreString(sender) + "\r\nRestart?");
                 break;
-            case Tie:
-                ShowTie("");
+            }
+            case Tie: {
+                ShowTie("It's a tie.\r\n" + getScoreString(sender) + "\r\nRestart?");
                 break;
+            }
         }
+    }
+
+    private String getScoreString(Game sender)
+    {
+        Player[] players = sender.getPlayers();
+        String score = String.format("Current score:\r\n\r\n\t%s - %d\r\n\t%s - %d\r\n",
+                players[0].getColor() == StoneColor.Black ? "Black Player" : "White Player",
+                players[0].getScore(),
+                players[1].getColor() == StoneColor.Black ? "Black Player" : "White Player",
+                players[1].getScore()) ;
+
+        return score;
     }
 
     private void restartTimer()
